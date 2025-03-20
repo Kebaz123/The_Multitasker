@@ -33,16 +33,47 @@ private:
    
     //fr = filter resonance
 
-    juce::Slider slider1f, slider2fr, slider3f, slider4fr, slider5f, slider6fr;
+    juce::Slider slider1f, slider2fr, slider3f, slider4fr, sliderReverb, sliderDelay, sliderSaturation, sliderGain;
+
+    juce::Label labelReverb;
+    juce::Label labelDelay;
+    juce::Label labelSaturation;
 
     juce::Label low_pass_label;
+
+    juce::Label lp_fq;
+    juce::Label lp_res;
+    juce::Label hp_fq;
+    juce::Label hp_res;
 
     juce::Label plugin_name;
 
     juce::GroupComponent filters_group;
+    juce::GroupComponent effect_group;
 
     juce::GroupComponent lowpass_group;
     juce::GroupComponent highpass_group;
+
+    juce::GroupComponent gain_group;
+    juce::Label labelGain;
+
+    juce::ToggleButton toggleLP;
+    juce::ToggleButton toggleHP;
+
+    juce::ToggleButton toggleReverb;
+    juce::ToggleButton toggleDelay;
+    juce::ToggleButton toggleSaturation;
+
+    juce::ToggleButton toggleGain;
+
+    juce::Label lableToggleGain;
+    juce::Label lableToggleReverb;
+    juce::Label lableToggleSaturation;
+    juce::Label lableToggleDelay;
+    juce::Label lableToggleLP;
+    juce::Label lableToggleHP;
+
+    
 
 
     void createSlider(juce::Slider& slider_instance, juce::Slider::SliderStyle style_info, double min, double max, double basic) {
