@@ -30,12 +30,28 @@ private:
     TheMultiTaskerAudioProcessor& audioProcessor;
 
 
+   
+    //fr = filter resonance
 
-    juce::Slider slider;
+    juce::Slider slider1f, slider2fr, slider3f, slider4fr, slider5f, slider6fr;
+
+    juce::Label low_pass_label;
 
     juce::Label plugin_name;
 
-    void createSlider();
+    juce::GroupComponent filters_group;
+
+    juce::GroupComponent lowpass_group;
+    juce::GroupComponent highpass_group;
+
+
+    void createSlider(juce::Slider& slider_instance, juce::Slider::SliderStyle style_info, double min, double max, double basic) {
+
+        slider_instance.setSliderStyle(style_info);
+        slider_instance.setTextBoxStyle(juce::Slider::TextBoxRight, false, 80, 20);
+        slider_instance.setRange(min, max, basic);
+
+    }
 
 
 
