@@ -29,5 +29,17 @@ private:
     // access the processor object that created it.
     TheMultiTaskerAudioProcessor& audioProcessor;
 
+
+
+    juce::Slider slider;
+
+    juce::Label plugin_name;
+
+    void createSlider();
+
+
+
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheMultiTaskerAudioProcessorEditor)
+
 };
