@@ -12,14 +12,14 @@
 //==============================================================================
 TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
+#endif
+        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+    ), LPfilter(juce::dsp::IIR::Coefficients<float>::makeLowPass(44100, 20000.0, 0.1f))
 #endif
 {
 }
@@ -90,11 +90,21 @@ void TheMultiTaskerAudioProcessor::changeProgramName (int index, const juce::Str
 {
 }
 
+
 //==============================================================================
 void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    last_sample_rate = sampleRate;
+
+    juce::dsp::ProcessSpec info;
+    info.sampleRate = sampleRate;
+    info.maximumBlockSize = samplesPerBlock;
+    info.numChannels = getTotalNumOutputChannels();
+    LPfilter.prepare(info);
+
+    LPfilter.reset();
+   
+    
 }
 
 void TheMultiTaskerAudioProcessor::releaseResources()
@@ -129,33 +139,31 @@ bool TheMultiTaskerAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 }
 #endif
 
+void TheMultiTaskerAudioProcessor::update_filter() {
+
+
+
+    *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, 1000.0, 0.1f);
+}
+
 void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
+    juce::dsp::AudioBlock<float> block(buffer);
+    update_filter();
+    
+    LPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
 
-        // ..do something to the data...
-    }
+
+
+    
+
 }
 
 //==============================================================================
