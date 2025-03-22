@@ -118,8 +118,10 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
   
 
     //sliders
-    
+    slider1f_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "LP", slider1f);
     addAndMakeVisible(slider1f);
+
+
     addAndMakeVisible(slider2fr);
     addAndMakeVisible(slider3f);
     addAndMakeVisible(slider4fr);
@@ -128,8 +130,11 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
 
     low_pass_label.setText("Lowpass Filter", juce::dontSendNotification);
 
+
     createSlider(slider1f, juce::Slider::LinearHorizontal, 20.0, 20000.0, 1.0);
     slider1f.setSkewFactorFromMidPoint(1000.0);
+
+   
 
     createSlider(slider2fr, juce::Slider::LinearHorizontal, 0.0, 100.0, 1);
     

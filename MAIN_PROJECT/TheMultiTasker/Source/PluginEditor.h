@@ -23,13 +23,14 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+   
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     TheMultiTaskerAudioProcessor& audioProcessor;
 
-
+   
    
     //fr = filter resonance
 
@@ -74,6 +75,8 @@ private:
     juce::Label lableToggleHP;
 
     
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider1f_attachment;
+
 
 
     void createSlider(juce::Slider& slider_instance, juce::Slider::SliderStyle style_info, double min, double max, double basic) {

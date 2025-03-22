@@ -19,14 +19,41 @@ TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
 #endif
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-    ), LPfilter(juce::dsp::IIR::Coefficients<float>::makeLowPass(44100, 20000.0, 0.1f))
+
+    ), LPfilter(juce::dsp::IIR::Coefficients<float>::makeLowPass(44100, 20000.0, 0.1f)), treeState(*this, nullptr, "slider_values", createParameterLayout())
 #endif
 {
+    treeState.addParameterListener("LP", this);
+
 }
 
 TheMultiTaskerAudioProcessor::~TheMultiTaskerAudioProcessor()
 {
+    treeState.removeParameterListener("LP", this);
 }
+
+
+juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor::createParameterLayout()
+{
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> parameters;
+
+    auto parameterLP = std::make_unique<juce::AudioParameterFloat>("LP", "LowPass", 20.0, 20000.0, 1000.0);
+
+    parameters.push_back(std::move(parameterLP));
+
+    return { parameters.begin(), parameters.end() };
+
+
+}
+
+void TheMultiTaskerAudioProcessor::parameterChanged(const juce::String& parameterID, float new_parameter_value) {
+
+    if (parameterID == "LowPass") {
+        LPcutoffFREQ = new_parameter_value;
+    }
+
+}
+
 
 //==============================================================================
 const juce::String TheMultiTaskerAudioProcessor::getName() const
@@ -141,9 +168,9 @@ bool TheMultiTaskerAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 
 void TheMultiTaskerAudioProcessor::update_filter() {
 
+    float LPcutoff = *treeState.getRawParameterValue("LP");
 
-
-    *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, 1000.0, 0.1f);
+    *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, 0.1f);
 }
 
 void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -166,6 +193,7 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 
 }
 
+
 //==============================================================================
 bool TheMultiTaskerAudioProcessor::hasEditor() const
 {
@@ -183,6 +211,9 @@ void TheMultiTaskerAudioProcessor::getStateInformation (juce::MemoryBlock& destD
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+
+    
+
 }
 
 void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)

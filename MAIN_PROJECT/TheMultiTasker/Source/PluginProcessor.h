@@ -13,7 +13,7 @@
 //==============================================================================
 /**
 */
-class TheMultiTaskerAudioProcessor  : public juce::AudioProcessor
+class TheMultiTaskerAudioProcessor  : public juce::AudioProcessor, juce::AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -53,16 +53,19 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     void update_filter();
+    juce::AudioProcessorValueTreeState treeState;
 
+  
 private:
-    double last_sample_rate;
+    double last_sample_rate=0;
     
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> LPfilter;
-
 
     float LPcutoffFREQ = 1000.0f;
     float HPcutoffFREQ = 1000.0f;
 
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    void parameterChanged(const juce::String& parameterID, float newValue) override;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheMultiTaskerAudioProcessor)
