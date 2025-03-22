@@ -25,6 +25,7 @@ TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
 {
     treeState.addParameterListener("LP", this);
     treeState.addParameterListener("HP", this);
+    treeState.addParameterListener("LPr", this);
 
 }
 
@@ -40,9 +41,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> parameters;
 
     auto parameterLP = std::make_unique<juce::AudioParameterFloat>("LP", "LowPass", 20.0, 20000.0, 1000.0);
+    auto parameterLPr = std::make_unique<juce::AudioParameterFloat>("LPr", "LowPassResonance", 0.1, 100.0, 0.1);
     auto parameterHP = std::make_unique<juce::AudioParameterFloat>("HP", "HighPass", 20.0, 20000.0, 1000.0);
 
     parameters.push_back(std::move(parameterLP));
+    parameters.push_back(std::move(parameterLPr));
     parameters.push_back(std::move(parameterHP));
 
     return { parameters.begin(), parameters.end() };
@@ -177,9 +180,10 @@ bool TheMultiTaskerAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 void TheMultiTaskerAudioProcessor::update_filter() {
 
     LPcutoff = *treeState.getRawParameterValue("LP");
+    LPresonance = *treeState.getRawParameterValue("LPr");
     HPcutoff = *treeState.getRawParameterValue("HP");
 
-    *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, 0.1f);
+    *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, LPresonance);
     *HPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(last_sample_rate, HPcutoff, 0.1f);
 }
 
@@ -239,6 +243,7 @@ void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int si
 
         treeState.state = tree;
         LPcutoff = static_cast<float>(*treeState.getRawParameterValue("LP"));
+        LPresonance = static_cast<float>(*treeState.getRawParameterValue("LPr"));
         HPcutoff = static_cast<float>(*treeState.getRawParameterValue("HP"));
 
     }

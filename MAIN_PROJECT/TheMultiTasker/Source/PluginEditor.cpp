@@ -121,8 +121,11 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
     slider1f_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "LP", slider1f);
     addAndMakeVisible(slider1f);
 
-
+    slider2fr_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "LPr", slider2fr);
     addAndMakeVisible(slider2fr);
+   
+
+
     slider3f_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "HP", slider3f);
     addAndMakeVisible(slider3f);
     addAndMakeVisible(slider4fr);

@@ -63,10 +63,9 @@ private:
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> LPfilter;
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> HPfilter;
     float LPcutoff = 1000.0f;
+    float LPresonance = 100.0f;
     float HPcutoff = 1000.0f;
 
-    float LPcutoffFREQ = 1000.0f;
-    float HPcutoffFREQ = 1000.0f;
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void parameterChanged(const juce::String& parameterID, float newValue) override;

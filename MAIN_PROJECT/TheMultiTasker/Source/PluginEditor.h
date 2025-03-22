@@ -76,6 +76,7 @@ private:
 
     
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider1f_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider2fr_attachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider3f_attachment;
 
 
