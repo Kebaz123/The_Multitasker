@@ -61,7 +61,9 @@ private:
     double last_sample_rate=0;
     
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> LPfilter;
+    juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> HPfilter;
     float LPcutoff = 1000.0f;
+    float HPcutoff = 1000.0f;
 
     float LPcutoffFREQ = 1000.0f;
     float HPcutoffFREQ = 1000.0f;

@@ -24,12 +24,14 @@ TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
 #endif
 {
     treeState.addParameterListener("LP", this);
+    treeState.addParameterListener("HP", this);
 
 }
 
 TheMultiTaskerAudioProcessor::~TheMultiTaskerAudioProcessor()
 {
     treeState.removeParameterListener("LP", this);
+    treeState.removeParameterListener("HP", this);
 }
 
 
@@ -38,8 +40,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> parameters;
 
     auto parameterLP = std::make_unique<juce::AudioParameterFloat>("LP", "LowPass", 20.0, 20000.0, 1000.0);
+    auto parameterHP = std::make_unique<juce::AudioParameterFloat>("HP", "HighPass", 20.0, 20000.0, 1000.0);
 
     parameters.push_back(std::move(parameterLP));
+    parameters.push_back(std::move(parameterHP));
 
     return { parameters.begin(), parameters.end() };
 
@@ -130,8 +134,10 @@ void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samples
     info.maximumBlockSize = samplesPerBlock;
     info.numChannels = getTotalNumOutputChannels();
     LPfilter.prepare(info);
+    HPfilter.prepare(info);
 
     LPfilter.reset();
+    HPfilter.reset();
    
     
 }
@@ -171,8 +177,10 @@ bool TheMultiTaskerAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 void TheMultiTaskerAudioProcessor::update_filter() {
 
     LPcutoff = *treeState.getRawParameterValue("LP");
+    HPcutoff = *treeState.getRawParameterValue("HP");
 
     *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, 0.1f);
+    *HPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(last_sample_rate, HPcutoff, 0.1f);
 }
 
 void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -188,6 +196,7 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     update_filter();
     
     LPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
+    HPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
 
 
 
@@ -230,6 +239,7 @@ void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int si
 
         treeState.state = tree;
         LPcutoff = static_cast<float>(*treeState.getRawParameterValue("LP"));
+        HPcutoff = static_cast<float>(*treeState.getRawParameterValue("HP"));
 
     }
 
