@@ -25,28 +25,70 @@ TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
 {
     treeState.addParameterListener("LP", this);
     treeState.addParameterListener("HP", this);
+    treeState.addParameterListener("HPr", this);
     treeState.addParameterListener("LPr", this);
+    treeState.addParameterListener("toggleLP", this);
+    treeState.addParameterListener("toggleHP", this);
+    treeState.addParameterListener("toggleGain", this);
+    
+    treeState.addParameterListener("toggleReverb", this);
+    treeState.addParameterListener("toggleDelay", this);
+    treeState.addParameterListener("toggleSaturation", this);
+
+    treeState.addParameterListener("gain", this);
 
 }
 
 TheMultiTaskerAudioProcessor::~TheMultiTaskerAudioProcessor()
 {
     treeState.removeParameterListener("LP", this);
+    treeState.removeParameterListener("LPr", this);
     treeState.removeParameterListener("HP", this);
-}
+    treeState.removeParameterListener("HPr", this);
+    treeState.removeParameterListener("toggleLP", this);
+    treeState.removeParameterListener("toggleHP", this);
+    treeState.removeParameterListener("gain", this);
+    treeState.removeParameterListener("toggleGain", this);
+
+    treeState.removeParameterListener("toggleReverb", this);
+    treeState.removeParameterListener("toggleDelay", this);
+    treeState.removeParameterListener("toggleSaturation", this);
+
+}   
 
 
 juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> parameters;
 
-    auto parameterLP = std::make_unique<juce::AudioParameterFloat>("LP", "LowPass", 20.0, 20000.0, 1000.0);
+    auto parameterLP = std::make_unique<juce::AudioParameterFloat>("LP", "LowPass", 20.0, 20000.0, 20000.0);
     auto parameterLPr = std::make_unique<juce::AudioParameterFloat>("LPr", "LowPassResonance", 0.1, 100.0, 0.1);
-    auto parameterHP = std::make_unique<juce::AudioParameterFloat>("HP", "HighPass", 20.0, 20000.0, 1000.0);
+    auto parameterHP = std::make_unique<juce::AudioParameterFloat>("HP", "HighPass", 20.0, 20000.0, 20.0);
+    auto parameterHPr = std::make_unique<juce::AudioParameterFloat>("HPr", "HighPassResonance", 0.1, 100.0, 0.1);
+
+    auto parameterToggleLP = std::make_unique<juce::AudioParameterBool>("toggleLP", "toggleLowPass",  false);
+    auto parameterToggleHP = std::make_unique<juce::AudioParameterBool>("toggleHP", "toggleHighPass", false);
+    auto parameterToggleGain = std::make_unique<juce::AudioParameterBool>("toggleGain", "ToggleGain", false);
+
+    auto parameterToggleReverb = std::make_unique<juce::AudioParameterBool>("toggleReverb", "ToggleReverb", false);
+    auto parameterToggleDelay = std::make_unique<juce::AudioParameterBool>("toggleDelay", "ToggleDelay", false);
+    auto parameterToggleSaturation = std::make_unique<juce::AudioParameterBool>("toggleSaturation", "ToggleSaturation", false);
+
+    auto parameterGain = std::make_unique<juce::AudioParameterFloat>("gain", "Gain", -24, 24, 0.0);
 
     parameters.push_back(std::move(parameterLP));
     parameters.push_back(std::move(parameterLPr));
     parameters.push_back(std::move(parameterHP));
+    parameters.push_back(std::move(parameterHPr));
+    parameters.push_back(std::move(parameterToggleLP));
+    parameters.push_back(std::move(parameterToggleHP));
+    parameters.push_back(std::move(parameterGain));
+    parameters.push_back(std::move(parameterToggleGain));
+
+    parameters.push_back(std::move(parameterToggleReverb));
+    parameters.push_back(std::move(parameterToggleDelay));
+    parameters.push_back(std::move(parameterToggleSaturation));
+
 
     return { parameters.begin(), parameters.end() };
 
@@ -181,10 +223,30 @@ void TheMultiTaskerAudioProcessor::update_filter() {
 
     LPcutoff = *treeState.getRawParameterValue("LP");
     LPresonance = *treeState.getRawParameterValue("LPr");
+    HPresonance = *treeState.getRawParameterValue("HPr");
     HPcutoff = *treeState.getRawParameterValue("HP");
 
-    *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, LPresonance);
-    *HPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(last_sample_rate, HPcutoff, 0.1f);
+    toggleLP = *treeState.getRawParameterValue("toggleLP");
+    toggleHP = *treeState.getRawParameterValue("toggleHP");
+    toggleGain = *treeState.getRawParameterValue("toggleGain");
+
+    toggleReverb = *treeState.getRawParameterValue("toggleReverb");
+    toggleDelay= *treeState.getRawParameterValue("toggleDelay");
+    toggleSaturation = *treeState.getRawParameterValue("toggleSaturation");
+
+    if (toggleLP) {
+        *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, LPresonance);
+    }
+    else {
+        *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, 20000.0, 0.1);
+    }
+    if (toggleHP) {
+        *HPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(last_sample_rate, HPcutoff, HPresonance);
+    }
+    else {
+        *HPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeHighPass(last_sample_rate, 20.0, 0.1);
+
+    }
 }
 
 void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -196,6 +258,10 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    float convertedGain = juce::Decibels::decibelsToGain(static_cast<float>(*treeState.getRawParameterValue("gain")));
+
+    
+
     juce::dsp::AudioBlock<float> block(buffer);
     update_filter();
     
@@ -203,7 +269,18 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     HPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
 
 
+    if (toggleGain) {
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            auto* blockData = block.getChannelPointer(channel);
 
+            for (int sample = 0; sample < block.getNumSamples(); ++sample) {
+                blockData[sample] *= convertedGain;
+            }
+
+
+        }
+    }
     
 
 }
@@ -244,7 +321,20 @@ void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int si
         treeState.state = tree;
         LPcutoff = static_cast<float>(*treeState.getRawParameterValue("LP"));
         LPresonance = static_cast<float>(*treeState.getRawParameterValue("LPr"));
+        HPresonance = static_cast<float>(*treeState.getRawParameterValue("LPr"));
         HPcutoff = static_cast<float>(*treeState.getRawParameterValue("HP"));
+        gain = static_cast<float>(*treeState.getRawParameterValue("gain"));
+
+
+        toggleLP=static_cast<bool>(*treeState.getRawParameterValue("toggleLP"));
+        toggleHP=static_cast<bool>(*treeState.getRawParameterValue("toggleHP"));
+        toggleGain =static_cast<bool>(*treeState.getRawParameterValue("toggleGain"));
+
+
+        toggleReverb = static_cast<bool>(*treeState.getRawParameterValue("toggleReverb"));
+        toggleDelay = static_cast<bool>(*treeState.getRawParameterValue("toggleDelay"));
+        toggleSaturation = static_cast<bool>(*treeState.getRawParameterValue("toggleSaturation"));
+
 
     }
 

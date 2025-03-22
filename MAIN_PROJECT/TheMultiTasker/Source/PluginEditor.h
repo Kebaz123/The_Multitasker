@@ -78,7 +78,20 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider1f_attachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider2fr_attachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider3f_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> slider4fr_attachment;
 
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleLP_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleHP_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleGain_attachment;
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleReverb_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleDelay_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> toggleSaturation_attachment;
+
+
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderGain_attachment;
 
 
     void createSlider(juce::Slider& slider_instance, juce::Slider::SliderStyle style_info, double min, double max, double basic) {

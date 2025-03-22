@@ -62,9 +62,23 @@ private:
     
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> LPfilter;
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> HPfilter;
+
+    
+
     float LPcutoff = 1000.0f;
-    float LPresonance = 100.0f;
+    float LPresonance = 0.1f;
     float HPcutoff = 1000.0f;
+    float HPresonance = 0.1f;
+
+    bool toggleLP = true;
+    bool toggleHP = true;
+    bool toggleGain = true;
+    
+    bool toggleReverb = true;
+    bool toggleDelay = true;
+    bool toggleSaturation = true;
+
+    float gain = 0.0f;
 
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

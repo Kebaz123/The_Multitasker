@@ -23,6 +23,10 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
 
 //effects 
 
+    toggleReverb_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleReverb", toggleReverb);
+    toggleDelay_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleDelay", toggleDelay);
+    toggleSaturation_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleSaturation", toggleSaturation);
+
     addAndMakeVisible(lableToggleReverb);
     addAndMakeVisible(lableToggleDelay);
     addAndMakeVisible(lableToggleSaturation);
@@ -60,7 +64,7 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
     createSlider(sliderSaturation, juce::Slider::LinearHorizontal, 0.0, 100.0, 1.0);
 
 //gain  
-
+    toggleGain_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleGain", toggleGain);
     addAndMakeVisible(toggleGain);
     addAndMakeVisible(lableToggleGain);
     lableToggleGain.setText("Toggle gain", juce::dontSendNotification);
@@ -69,6 +73,9 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
 
     addAndMakeVisible(gain_group);
     addAndMakeVisible(labelGain);
+
+    sliderGain_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "gain", sliderGain);
+
     addAndMakeVisible(sliderGain);
     gain_group.setText("Gain");
     createSlider(sliderGain, juce::Slider::LinearHorizontal, -24.0, 24.0, 1);
@@ -84,6 +91,10 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
 // 
     addAndMakeVisible(lableToggleLP);
     addAndMakeVisible(lableToggleHP);
+
+
+    toggleLP_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleLP", toggleLP);
+    toggleHP_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleHP", toggleHP);
     addAndMakeVisible(toggleLP);
     addAndMakeVisible(toggleHP);
 
@@ -126,8 +137,12 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
    
 
 
+   
+    
     slider3f_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "HP", slider3f);
     addAndMakeVisible(slider3f);
+
+    slider4fr_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "HPr", slider4fr);
     addAndMakeVisible(slider4fr);
   
     addAndMakeVisible(low_pass_label);
@@ -184,8 +199,8 @@ void TheMultiTaskerAudioProcessorEditor::paint (juce::Graphics& g)
 
     lowpass_group.setBounds(slider1f.getX() - slider1f.getWidth() * 0.075, slider1f.getY() - slider1f.getWidth() * 0.05, filters_group.getWidth() - filters_group.getWidth() * 0.1, slider1f.getHeight()+slider2fr.getHeight() + filters_group.getHeight() * 0.1);
     highpass_group.setBounds(slider1f.getX() - slider1f.getWidth() * 0.075, slider1f.getY() + slider1f.getWidth() * 0.62, filters_group.getWidth() - filters_group.getWidth() * 0.1, slider1f.getHeight()+slider2fr.getHeight() + filters_group.getHeight() * 0.1);
-    toggleLP.setBounds(slider1f.getX() + slider1f.getWidth() * 0.25, getHeight()*0.70, filters_group.getWidth() - filters_group.getWidth() * 0.1, slider1f.getHeight() + slider2fr.getHeight() + filters_group.getHeight() * 0.1);
-    toggleHP.setBounds(slider1f.getX() + slider1f.getWidth() * 0.80, getHeight()*0.70, filters_group.getWidth() - filters_group.getWidth() * 0.1, slider1f.getHeight() + slider2fr.getHeight() + filters_group.getHeight() * 0.1);
+    toggleLP.setBounds(slider1f.getX() + slider1f.getWidth() * 0.25, getHeight()*0.85, gain_group.getWidth() * 0.1, gain_group.getHeight() * 0.2);
+    toggleHP.setBounds(slider1f.getX() + slider1f.getWidth() * 0.80, getHeight()*0.85, gain_group.getWidth() * 0.1, gain_group.getHeight() * 0.2);
 
 
     effect_group.setBounds(filters_group.getX() + filters_group.getWidth() + margin, margin, getWidth() * 0.50, getWidth() * 0.30);
@@ -205,7 +220,7 @@ void TheMultiTaskerAudioProcessorEditor::paint (juce::Graphics& g)
     labelSaturation.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.56, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
 
     gain_group.setBounds(filters_group.getX() + filters_group.getWidth() + margin, margin+effect_group.getHeight()+effect_group.getHeight()*0.1, getWidth() * 0.50, getWidth() * 0.15);
-    toggleGain.setBounds(gain_group.getX() + gain_group.getWidth() * 0.55, gain_group.getY() + gain_group.getHeight() * 0.70, gain_group.getWidth() * 0.40, gain_group.getHeight() * 0.2);
+    toggleGain.setBounds(gain_group.getX() + gain_group.getWidth() * 0.55, gain_group.getY() + gain_group.getHeight() * 0.70, gain_group.getWidth() * 0.1, gain_group.getHeight() * 0.2);
 
     sliderGain.setBounds(gain_group.getX() + gain_group.getWidth() * 0.1, gain_group.getY() + gain_group.getHeight() * 0.3, gain_group.getWidth() * 0.85, gain_group.getHeight() * 0.2);
     labelGain.setBounds(gain_group.getX() + gain_group.getWidth() * 0.1, gain_group.getY() + gain_group.getHeight() * 0.50, gain_group.getWidth() * 0.85, gain_group.getHeight() * 0.2);
