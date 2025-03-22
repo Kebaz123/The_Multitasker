@@ -45,14 +45,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
 
 
 }
+void TheMultiTaskerAudioProcessor::parameterChanged(const juce::String& parameterID, float newValue) {
 
-void TheMultiTaskerAudioProcessor::parameterChanged(const juce::String& parameterID, float new_parameter_value) {
+    if (parameterID == "LP")
+    {
+      //  LPcutoff = newValue;
 
-    if (parameterID == "LowPass") {
-        LPcutoffFREQ = new_parameter_value;
+
     }
-
 }
+
 
 
 //==============================================================================
@@ -168,7 +170,7 @@ bool TheMultiTaskerAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 
 void TheMultiTaskerAudioProcessor::update_filter() {
 
-    float LPcutoff = *treeState.getRawParameterValue("LP");
+    LPcutoff = *treeState.getRawParameterValue("LP");
 
     *LPfilter.state = *juce::dsp::IIR::Coefficients<float>::makeLowPass(last_sample_rate, LPcutoff, 0.1f);
 }
@@ -212,7 +214,8 @@ void TheMultiTaskerAudioProcessor::getStateInformation (juce::MemoryBlock& destD
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 
-    
+    juce::MemoryOutputStream save_stream(destData, false);
+    treeState.state.writeToStream(save_stream);
 
 }
 
@@ -220,6 +223,16 @@ void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int si
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+
+
+    auto tree = juce::ValueTree::readFromData(data, size_t(sizeInBytes));
+    if (tree.isValid()) {
+
+        treeState.state = tree;
+        LPcutoff = static_cast<float>(*treeState.getRawParameterValue("LP"));
+
+    }
+
 }
 
 //==============================================================================
