@@ -63,7 +63,7 @@ private:
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> LPfilter;
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> HPfilter;
 
-    
+    juce::Reverb ReverbEffect;
 
     float LPcutoff = 1000.0f;
     float LPresonance = 0.1f;

@@ -171,7 +171,20 @@ void TheMultiTaskerAudioProcessor::changeProgramName (int index, const juce::Str
 
 //==============================================================================
 void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
+{   
+
+    juce::dsp::Reverb::Parameters params;
+  
+
+    params.roomSize = 0.6f;
+    params.damping = 0.5f;
+    params.wetLevel = 0.4f;
+    params.dryLevel = 0.8f;
+    params.width = 1.0f;
+    params.freezeMode = 0.0f;
+    params.width = 0.0f;
+    ReverbEffect.setParameters(params);
+
     last_sample_rate = sampleRate;
 
     juce::dsp::ProcessSpec info;
@@ -181,8 +194,13 @@ void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samples
     LPfilter.prepare(info);
     HPfilter.prepare(info);
 
+
+  //  ReverbEffect.prepare({ sampleRate, (juce::uint32)samplesPerBlock, 2 });
+
+
     LPfilter.reset();
     HPfilter.reset();
+    ReverbEffect.reset();
    
     
 }
@@ -267,6 +285,12 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     
     LPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
     HPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
+
+    auto monoReverb = block.getSingleChannelBlock(0);
+
+
+    ReverbEffect.processStereo(block.getChannelPointer(0), block.getChannelPointer(1), buffer.getNumSamples());
+
 
 
     if (toggleGain) {
