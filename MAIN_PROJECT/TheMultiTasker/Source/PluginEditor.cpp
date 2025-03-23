@@ -24,6 +24,7 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
 //effects 
 
     toggleReverb_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleReverb", toggleReverb);
+    sliderReverb_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "reverbRoomSize", sliderReverb);
     toggleDelay_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleDelay", toggleDelay);
     toggleSaturation_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleSaturation", toggleSaturation);
 
@@ -59,7 +60,7 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
     labelDelay.setText("Delay", juce::dontSendNotification);
     labelSaturation.setText("Saturation", juce::dontSendNotification);
 
-    createSlider(sliderReverb, juce::Slider::LinearHorizontal, 0.0, 100.0, 1.0);
+    createSlider(sliderReverb, juce::Slider::LinearHorizontal, 0.0, 1, 0.0);
     createSlider(sliderDelay, juce::Slider::LinearHorizontal, 0.0, 100.0, 1.0);
     createSlider(sliderSaturation, juce::Slider::LinearHorizontal, 0.0, 100.0, 1.0);
 

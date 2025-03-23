@@ -53,6 +53,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     void update_filter();
+    void update_effect();
     juce::AudioProcessorValueTreeState treeState;
 
   
@@ -79,6 +80,7 @@ private:
     bool toggleSaturation = true;
 
     float gain = 0.0f;
+    float reverbRoomSize = 0.0f;
 
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

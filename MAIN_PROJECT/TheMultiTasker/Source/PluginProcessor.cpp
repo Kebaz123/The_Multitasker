@@ -36,6 +36,7 @@ TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
     treeState.addParameterListener("toggleSaturation", this);
 
     treeState.addParameterListener("gain", this);
+    treeState.addParameterListener("reverbRoomSize", this);
 
 }
 
@@ -48,6 +49,7 @@ TheMultiTaskerAudioProcessor::~TheMultiTaskerAudioProcessor()
     treeState.removeParameterListener("toggleLP", this);
     treeState.removeParameterListener("toggleHP", this);
     treeState.removeParameterListener("gain", this);
+    treeState.removeParameterListener("reverbRoomSize", this);
     treeState.removeParameterListener("toggleGain", this);
 
     treeState.removeParameterListener("toggleReverb", this);
@@ -75,6 +77,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
     auto parameterToggleSaturation = std::make_unique<juce::AudioParameterBool>("toggleSaturation", "ToggleSaturation", false);
 
     auto parameterGain = std::make_unique<juce::AudioParameterFloat>("gain", "Gain", -24, 24, 0.0);
+    auto parameterReverbRoomSize = std::make_unique<juce::AudioParameterFloat>("reverbRoomSize", "ReverbRoomSize", 0.0, 1, 0.0);
 
     parameters.push_back(std::move(parameterLP));
     parameters.push_back(std::move(parameterLPr));
@@ -83,6 +86,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
     parameters.push_back(std::move(parameterToggleLP));
     parameters.push_back(std::move(parameterToggleHP));
     parameters.push_back(std::move(parameterGain));
+    parameters.push_back(std::move(parameterReverbRoomSize));
     parameters.push_back(std::move(parameterToggleGain));
 
     parameters.push_back(std::move(parameterToggleReverb));
@@ -176,7 +180,7 @@ void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samples
     juce::dsp::Reverb::Parameters params;
   
 
-    params.roomSize = 0.6f;
+    params.roomSize = reverbRoomSize;
     params.damping = 0.5f;
     params.wetLevel = 0.4f;
     params.dryLevel = 0.8f;
@@ -267,6 +271,25 @@ void TheMultiTaskerAudioProcessor::update_filter() {
     }
 }
 
+void TheMultiTaskerAudioProcessor::update_effect() {
+
+    reverbRoomSize = *treeState.getRawParameterValue("reverbRoomSize");
+
+    juce::dsp::Reverb::Parameters params;
+    params.roomSize = reverbRoomSize;
+    params.damping = 0.5f;
+    params.wetLevel = 0.4f;
+    params.dryLevel = 0.8f;
+    params.width = 1.0f;
+    params.freezeMode = 0.0f;
+    params.width = 0.0f;
+    ReverbEffect.setParameters(params);
+
+
+
+
+}
+
 void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -282,14 +305,13 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 
     juce::dsp::AudioBlock<float> block(buffer);
     update_filter();
+   
     
     LPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
     HPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
 
-    auto monoReverb = block.getSingleChannelBlock(0);
-
-
-    ReverbEffect.processStereo(block.getChannelPointer(0), block.getChannelPointer(1), buffer.getNumSamples());
+    update_effect();
+    if(toggleReverb) ReverbEffect.processStereo(block.getChannelPointer(0), block.getChannelPointer(1), buffer.getNumSamples());
 
 
 
@@ -348,6 +370,7 @@ void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int si
         HPresonance = static_cast<float>(*treeState.getRawParameterValue("LPr"));
         HPcutoff = static_cast<float>(*treeState.getRawParameterValue("HP"));
         gain = static_cast<float>(*treeState.getRawParameterValue("gain"));
+        reverbRoomSize = static_cast<float>(*treeState.getRawParameterValue("reverbRoomSize"));
 
 
         toggleLP=static_cast<bool>(*treeState.getRawParameterValue("toggleLP"));
