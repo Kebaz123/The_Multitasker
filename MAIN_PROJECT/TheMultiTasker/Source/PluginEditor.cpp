@@ -14,7 +14,7 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     setSize (800, 450);
-
+   
 
     //plugin name label
     addAndMakeVisible(plugin_name);
@@ -184,8 +184,8 @@ void TheMultiTaskerAudioProcessorEditor::paint (juce::Graphics& g)
 
 
 
-    g.fillAll(juce::Colours::floralwhite);
-    g.setColour (juce::Colours::white);
+    g.fillAll(juce::Colours::black);
+    g.setColour (juce::Colours::black);
     g.setFont (juce::Font (40.0f));
     
     auto margin = getWidth() / 32;
