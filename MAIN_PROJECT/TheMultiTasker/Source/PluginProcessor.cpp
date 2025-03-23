@@ -37,6 +37,7 @@ TheMultiTaskerAudioProcessor::TheMultiTaskerAudioProcessor()
 
     treeState.addParameterListener("gain", this);
     treeState.addParameterListener("reverbRoomSize", this);
+    treeState.addParameterListener("saturationDrive", this);
 
 }
 
@@ -55,6 +56,7 @@ TheMultiTaskerAudioProcessor::~TheMultiTaskerAudioProcessor()
     treeState.removeParameterListener("toggleReverb", this);
     treeState.removeParameterListener("toggleDelay", this);
     treeState.removeParameterListener("toggleSaturation", this);
+    treeState.removeParameterListener("saturationDrive", this);
 
 }   
 
@@ -78,6 +80,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
 
     auto parameterGain = std::make_unique<juce::AudioParameterFloat>("gain", "Gain", -24, 24, 0.0);
     auto parameterReverbRoomSize = std::make_unique<juce::AudioParameterFloat>("reverbRoomSize", "ReverbRoomSize", 0.0, 1, 0.0);
+    auto parameterSaturationDrive = std::make_unique<juce::AudioParameterFloat>("saturationDrive", "SaturationDrive", 1, 2, 0.0);
 
     parameters.push_back(std::move(parameterLP));
     parameters.push_back(std::move(parameterLPr));
@@ -87,6 +90,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheMultiTaskerAudioProcessor
     parameters.push_back(std::move(parameterToggleHP));
     parameters.push_back(std::move(parameterGain));
     parameters.push_back(std::move(parameterReverbRoomSize));
+    parameters.push_back(std::move(parameterSaturationDrive));
     parameters.push_back(std::move(parameterToggleGain));
 
     parameters.push_back(std::move(parameterToggleReverb));
@@ -168,15 +172,19 @@ const juce::String TheMultiTaskerAudioProcessor::getProgramName (int index)
     return {};
 }
 
-void TheMultiTaskerAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void TheMultiTaskerAudioProcessor::changeProgramName(int index, const juce::String& newName)
 {
-}
+};
 
-
+float TheMultiTaskerAudioProcessor::saturation_func(float amount) {
+    const float drive = 1.5f;
+    return std::tanh(drive * amount);
+};
 //==============================================================================
 void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {   
 
+  
     juce::dsp::Reverb::Parameters params;
   
 
@@ -197,15 +205,20 @@ void TheMultiTaskerAudioProcessor::prepareToPlay (double sampleRate, int samples
     info.numChannels = getTotalNumOutputChannels();
     LPfilter.prepare(info);
     HPfilter.prepare(info);
+    saturation.prepare(info);
 
-
+    saturation.functionToUse = [this](float sample) {
+        
+        float drive = *treeState.getRawParameterValue("saturationDrive");
+        return std::tanh(drive * sample);
+    };
   //  ReverbEffect.prepare({ sampleRate, (juce::uint32)samplesPerBlock, 2 });
 
 
     LPfilter.reset();
     HPfilter.reset();
     ReverbEffect.reset();
-   
+    saturation.reset();
     
 }
 
@@ -306,14 +319,14 @@ void TheMultiTaskerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     juce::dsp::AudioBlock<float> block(buffer);
     update_filter();
    
-    
+   
     LPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
     HPfilter.process(juce::dsp::ProcessContextReplacing<float>(block));
 
     update_effect();
     if(toggleReverb) ReverbEffect.processStereo(block.getChannelPointer(0), block.getChannelPointer(1), buffer.getNumSamples());
 
-
+   if(toggleSaturation) saturation.process(juce::dsp::ProcessContextReplacing<float>(block));
 
     if (toggleGain) {
         for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -370,6 +383,7 @@ void TheMultiTaskerAudioProcessor::setStateInformation (const void* data, int si
         HPresonance = static_cast<float>(*treeState.getRawParameterValue("LPr"));
         HPcutoff = static_cast<float>(*treeState.getRawParameterValue("HP"));
         gain = static_cast<float>(*treeState.getRawParameterValue("gain"));
+        saturationDrive = static_cast<float>(*treeState.getRawParameterValue("saturationDrive"));
         reverbRoomSize = static_cast<float>(*treeState.getRawParameterValue("reverbRoomSize"));
 
 

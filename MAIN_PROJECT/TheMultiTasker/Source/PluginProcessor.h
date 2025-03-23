@@ -54,6 +54,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     void update_filter();
     void update_effect();
+    float amountNew = 0.0f;
+    float saturation_func(float amount);
     juce::AudioProcessorValueTreeState treeState;
 
   
@@ -65,6 +67,11 @@ private:
     juce::dsp::ProcessorDuplicator < juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>> HPfilter;
 
     juce::Reverb ReverbEffect;
+
+    juce::dsp::WaveShaper<float, std::function<float(float)>> saturation;
+
+    
+
 
     float LPcutoff = 1000.0f;
     float LPresonance = 0.1f;
@@ -81,6 +88,8 @@ private:
 
     float gain = 0.0f;
     float reverbRoomSize = 0.0f;
+     float saturationDrive = 0.0f;
+    
 
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

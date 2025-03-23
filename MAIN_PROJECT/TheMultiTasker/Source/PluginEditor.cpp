@@ -37,32 +37,35 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
 
 
     addAndMakeVisible(toggleReverb);
-    addAndMakeVisible(toggleDelay);
+ 
     addAndMakeVisible(toggleSaturation);
+
+    sliderSaturation_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "saturationDrive", sliderSaturation);
+
 
     addAndMakeVisible(effect_group);
     addAndMakeVisible(sliderReverb);
-    addAndMakeVisible(sliderDelay);
+   
     addAndMakeVisible(sliderSaturation);
 
     addAndMakeVisible(labelReverb);
-    addAndMakeVisible(labelDelay);
+   
     addAndMakeVisible(labelSaturation);
 
 
-    lableToggleDelay.attachToComponent(&toggleDelay, true);
+   
     lableToggleReverb.attachToComponent(&toggleReverb, true);
     lableToggleSaturation.attachToComponent(&toggleSaturation, true);
 
     effect_group.setText("Effects");
 
     labelReverb.setText("Reverb", juce::dontSendNotification);
-    labelDelay.setText("Delay", juce::dontSendNotification);
+    
     labelSaturation.setText("Saturation", juce::dontSendNotification);
 
     createSlider(sliderReverb, juce::Slider::LinearHorizontal, 0.0, 1, 0.0);
-    createSlider(sliderDelay, juce::Slider::LinearHorizontal, 0.0, 100.0, 1.0);
-    createSlider(sliderSaturation, juce::Slider::LinearHorizontal, 0.0, 100.0, 1.0);
+   
+    createSlider(sliderSaturation, juce::Slider::LinearHorizontal, 1, 2, 0.0);
 
 //gain  
     toggleGain_attachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(audioProcessor.treeState, "toggleGain", toggleGain);
@@ -76,7 +79,7 @@ TheMultiTaskerAudioProcessorEditor::TheMultiTaskerAudioProcessorEditor (TheMulti
     addAndMakeVisible(labelGain);
 
     sliderGain_attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.treeState, "gain", sliderGain);
-
+   
     addAndMakeVisible(sliderGain);
     gain_group.setText("Gain");
     createSlider(sliderGain, juce::Slider::LinearHorizontal, -24.0, 24.0, 1);
@@ -178,7 +181,10 @@ TheMultiTaskerAudioProcessorEditor::~TheMultiTaskerAudioProcessorEditor()
 //==============================================================================
 void TheMultiTaskerAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+
+
+
+    g.fillAll(juce::Colours::floralwhite);
     g.setColour (juce::Colours::white);
     g.setFont (juce::Font (40.0f));
     
@@ -206,16 +212,16 @@ void TheMultiTaskerAudioProcessorEditor::paint (juce::Graphics& g)
 
     effect_group.setBounds(filters_group.getX() + filters_group.getWidth() + margin, margin, getWidth() * 0.50, getWidth() * 0.30);
 
-    toggleReverb.setBounds(effect_group.getX() + effect_group.getWidth() * 0.25, effect_group.getY() +effect_group.getHeight()*0.7, effect_group.getWidth() * 0.20, effect_group.getHeight() * 0.15);
-    toggleDelay.setBounds(effect_group.getX() + effect_group.getWidth() * 0.55, effect_group.getY() +effect_group.getHeight()*0.7, effect_group.getWidth() * 0.20, effect_group.getHeight() * 0.15);
-    toggleSaturation.setBounds(effect_group.getX() + effect_group.getWidth() * 0.90, effect_group.getY() +effect_group.getHeight()*0.7, effect_group.getWidth() * 0.20, effect_group.getHeight() * 0.15);
+    toggleReverb.setBounds(effect_group.getX() + effect_group.getWidth() * 0.35, effect_group.getY() +effect_group.getHeight()*0.7, effect_group.getWidth() * 0.20, effect_group.getHeight() * 0.15);
+   
+    toggleSaturation.setBounds(effect_group.getX() + effect_group.getWidth() * 0.80, effect_group.getY() +effect_group.getHeight()*0.7, effect_group.getWidth() * 0.20, effect_group.getHeight() * 0.15);
     
 
-    sliderReverb.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.1, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
+    sliderReverb.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.25, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
     labelReverb.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.17, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
 
-    sliderDelay.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.3, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
-    labelDelay.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.36, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
+   
+
 
     sliderSaturation.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.50, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);
     labelSaturation.setBounds(effect_group.getX() + effect_group.getWidth() * 0.05, effect_group.getY() + effect_group.getHeight() * 0.56, effect_group.getWidth() - effect_group.getWidth() * 0.1, effect_group.getHeight() * 0.1);

@@ -93,6 +93,7 @@ private:
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderGain_attachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderReverb_attachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> sliderSaturation_attachment;
 
 
     void createSlider(juce::Slider& slider_instance, juce::Slider::SliderStyle style_info, double min, double max, double basic) {
